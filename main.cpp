@@ -11,10 +11,7 @@ using namespace std;
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-// void generateTerrain(vector<vector<GLfloat>> &positions);
-// glm::vec3 getNormalVector(glm::vec3 vert1, glm::vec3 vert2, glm::vec3 vert3);
 
-// settings
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 600;
 const unsigned int sceneN = 100;
@@ -24,27 +21,6 @@ float lastFrame = glfwGetTime();
 float deltaTime = 0;
 
 Camera camera(SCR_WIDTH, SCR_HEIGHT);
-
-GLuint cubeIndices[] = {
-    0, 1, 2, // first face
-    2, 3, 0, // first face
-
-    4, 5, 6, // second face
-    6, 7, 4, // second face
-
-    8, 9, 10,  // third face
-    10, 11, 8, // third face
-
-    12, 13, 14, // fourth face
-    14, 15, 12, // fourth face
-
-    16, 17, 18, // fith face
-    18, 19, 16, // fith face
-
-    20, 21, 22, // sixth face
-    22, 23, 20, // sixth face
-
-};
 
 int main()
 {
@@ -83,148 +59,8 @@ int main()
     // Specify the viewport
     glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
-    Texture textures[]{
-        // Texture
-        Texture("./resources/Textures/grassTexture.png", "diffuse", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-        Texture("./resources/Textures/grassTexture.png", "specular", 1, GL_RGBA, GL_UNSIGNED_BYTE),
-    };
-
     // Creates Shader object using shaders default.vert and default.frag
     Shader shaderProgram("./shaders/default.vert", "./shaders/default.frag");
-
-    // vector<Vertex> cubeVerts(cubeVertices, cubeVertices + sizeof(cubeVertices) / sizeof(Vertex));
-    // vector<GLuint> ind(cubeIndices, cubeIndices + sizeof(cubeIndices) / sizeof(GLuint));
-
-    // int tamN = sceneN + 1, tamM = sceneM + 1;
-
-    // int numVert = (2 * (tamN - 1)) * (2 * (tamM - 1));
-    // vector<Vertex> verts(numVert);
-
-    // // Vector to track the common vertices at one point (1,2)->{5,6,9,10}
-    // vector<vector<vector<GLuint>>> commonVert(tamN, vector<vector<GLuint>>(tamM));
-    // // Generate Vertex
-    // for (int posz = 0, idx = 0; posz <= tamN - 1; posz++)
-    // {
-    //     float distance = 0.1f;
-    //     int lastN = 2 * (tamN - 1);
-    //     int lastM = 2 * (tamM - 1);
-    //     for (int posx = 0; posx <= tamM - 1; posx++)
-    //     {
-    //         verts[idx].normal = glm::vec3(0.0f, 1.0f, 0.0f);
-    //         verts[idx].color = glm::vec3(0.0f, 0.0f, 1.0f);
-    //         verts[idx].position = glm::vec3(distance * posx, 1.0f, distance * posz);
-
-    //         // The corners
-    //         if ((posz == 0 && posx == 0) || (posz == 0 && posx == tamM - 1) || (posz == tamN - 1 && posx == 0) || (posx == tamM - 1 && posz == tamN - 1))
-    //         {
-    //             commonVert[posz][posx].push_back(idx);
-    //             idx++;
-    //         }
-    //         // (0, X) ^ (tamN, X)
-    //         else if ((posz == 0 && posx < tamM - 1) || (posz == tamN - 1 && posx < tamM - 1))
-    //         {
-    //             verts[idx + 1] = verts[idx];
-    //             commonVert[posz][posx].push_back(idx);
-    //             commonVert[posz][posx].push_back(idx + 1);
-    //             idx += 2;
-    //         }
-    //         // (X, 0) ^ (X, tamM)
-    //         else if ((posx == 0 && posz < tamN - 1) || (posx == tamN - 1 && posz < tamN - 1))
-    //         {
-    //             verts[idx + lastN] = verts[idx];
-    //             commonVert[posz][posx].push_back(idx);
-    //             commonVert[posz][posx].push_back(idx + lastN);
-
-    //             // Si estas al final de la columna salta en lastN indices sino ve al siguiente
-    //             idx += (posx == tamN - 1) ? lastN + 1 : 1;
-    //         }
-    //         // The middle points (X,X)
-    //         else if (posx > 0 && posx < tamM - 1 && posz > 0 && posz < tamN - 1)
-    //         {
-    //             verts[idx + 1] = verts[idx + lastN] = verts[idx + lastN + 1] = verts[idx];
-    //             commonVert[posz][posx].push_back(idx);
-    //             commonVert[posz][posx].push_back(idx + 1);
-    //             commonVert[posz][posx].push_back(idx + lastN);
-    //             commonVert[posz][posx].push_back(idx + lastN + 1);
-    //             idx += 2;
-    //         }
-    //     }
-    // }
-
-    // // // Generate Indices
-    // int numInd = ((tamN - 1) * (tamM - 1)) * 6;
-    // vector<GLuint> ind(numInd);
-    // for (int row = 0, idx = 0; row < tamN - 1; row++)
-    // {
-    //     int lastN = 2 * (tamN - 1);
-    //     for (int col = 0, val = 2 * lastN * (row); col < tamM - 1; col++, val += 2)
-    //     {
-    //         // First triangle indices
-    //         ind[idx++] = val;
-    //         ind[idx++] = val + 1;
-    //         ind[idx++] = val + lastN;
-
-    //         // Second Triangle indices
-    //         ind[idx++] = val + 1;
-    //         ind[idx++] = val + lastN;
-    //         ind[idx++] = val + lastN + 1;
-    //     }
-    // }
-    // // // cout << "Indices:\n";
-    // // // for (auto i = 0u; i < ind.size(); i += 3)
-    // // // cout << ind[i] << " " << ind[i + 1] << " " << ind[i + 2] << "\n";
-
-    // // // for perlinNoise calculation
-    // vector<vector<GLfloat>> terrainPositions(tamN, vector<GLfloat>(tamM));
-    // generateTerrain(terrainPositions);
-
-    // // // Assing the corresponding height to the Y component of the vertices
-    // for (unsigned int posz = 0, idx = 0; posz < terrainPositions.size(); posz++)
-    // {
-    //     for (unsigned int posx = 0; posx < terrainPositions[0].size(); posx++)
-    //     {
-    //         float mapHeight = 7.5f, noise = terrainPositions[posz][posx];
-    //         for (auto v : commonVert[posz][posx])
-    //         {
-    //             verts[v].position.y += noise * mapHeight * 0.4f;
-
-    //             glm::vec3 color;
-    //             float rgb = (noise);
-
-    //             if (noise < 0.4) // Water
-    //                 color = glm::vec3(0.0f, 0.0f, 2 * rgb);
-    //             else if (noise < 0.7) // Terrain
-    //                 color = glm::vec3(0.0f, rgb, rgb * 0.5f);
-    //             else // Mountain
-    //                 color = glm::vec3(rgb, rgb, rgb);
-    //             verts[v].color = color;
-    //         }
-    //     }
-    // }
-
-    // // Assing the correct Normal Vector to each Face
-    // for (int row = 0, idx = 0; row < tamN - 1; row++)
-    // {
-    //     int lastN = 2 * (tamN - 1);
-    //     for (int col = 0, val = 2 * lastN * (row); col < tamM - 1; col++, val += 2)
-    //     {
-
-    //         glm::vec3 normal = getNormalVector(verts[val].position, verts[val + 1].position, verts[val + lastN].position);
-    //         verts[val].normal = normal;
-    //         verts[val + 1].normal = normal;
-    //         verts[val + lastN].normal = normal;
-    //         verts[val + lastN + 1].normal = normal;
-    //     }
-    // }
-
-    // for (auto v : verts)
-    // cout << v.normal.x << " " << v.normal.y << " " << v.normal.z << '\n';
-
-    //---------------Setting objects in the scene---------------//
-    // vector<Texture> tex(textures, textures + sizeof(textures) / sizeof(Texture));
-    // Mesh plane(verts, ind, tex);
-
-    // cout << testE.value << "\n";
 
     Terrain plane(sceneM, sceneN);
 
@@ -235,7 +71,6 @@ int main()
     // The ModelMatrix
     glm::mat4 boxModel = glm::mat4(1.0f);
     shaderProgram.setMat4("model", boxModel);
-    // shaderProgram.setMat4(`"model", boxModel);
 
     //---------------Setting directional light in the scene---------------//
     shaderProgram.setVec3("dirLight.direction", 1.0f, -3.0f, 1.0f);
@@ -250,9 +85,17 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    // float angle = 30.0f; // degrees
+    // Precalculated Values to get a good point of view
+    // Euler Angles: -35 -127
+    float yawAngle = -127.0f, pitchAngle = -35.0f;
+    glm::vec3 cameraPos = glm::vec3(12.4346f, 11.155f, 15.5763f);
+    glm::vec3 cameraFront = glm::vec3(-0.492978, -0.573576, -0.654204);
+    camera.setLocation(cameraPos, cameraFront, yawAngle, pitchAngle);
 
-    unsigned int counter = 0;
+    float freq = plane.getFrequency(), amp = plane.getAmplitude();
+
+    GLuint counter;
+    float angle = 1.0f;
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -265,6 +108,7 @@ int main()
         // Clean the back buffer and assign the new color to it
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // FPS calculation
         float currentFrame = glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         counter++;
@@ -288,6 +132,7 @@ int main()
         camera.getMatrix(shaderProgram, "camMatrix");
 
         // Draw the Terrain
+        plane.checkUpdate();
         plane.drawTerrain(shaderProgram);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -328,46 +173,3 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
     camera.processMouseScroll((float)(yoffset));
 }
-
-// glm::vec3 getNormalVector(glm::vec3 vert1, glm::vec3 vert2, glm::vec3 vert3)
-// {
-//     glm::vec3 firstV = vert2 - vert1;
-//     glm::vec3 secondV = vert3 - vert1;
-
-//     return glm::normalize(glm::cross(firstV, secondV));
-// }
-
-// void generateTerrain(vector<vector<GLfloat>> &positions)
-// {
-//     srand(time(0));
-//     setUp();
-//     GLuint layers = 5;
-//     float maxNoiseValue = 0;
-//     vector<GLfloat> Noises;
-//     for (int i = 0; i < positions.size(); i++)
-//     {
-//         for (int j = 0; j < positions[0].size(); j++)
-//         {
-//             float amplitude = 1.0f, frequency = 0.04f, total = 0;
-//             for (int k = 0; k < layers; k++)
-//             {
-//                 float noise = amplitude * 0.5f * (perlinNoise(i * frequency, j * frequency) + 1.0f);
-//                 total += noise;
-//                 frequency *= 2;
-//                 amplitude *= 0.5;
-//             }
-//             maxNoiseValue = max(maxNoiseValue, total);
-//             Noises.push_back(total);
-//         }
-//     }
-//     for (float &n : Noises)
-//         n /= maxNoiseValue;
-
-//     for (int i = 0, count = 0; i < positions.size(); i++)
-//     {
-//         for (int j = 0; j < positions[0].size(); j++)
-//         {
-//             positions[i][j] = Noises[count++];
-//         }
-//     }
-// }

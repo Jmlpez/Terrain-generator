@@ -73,9 +73,22 @@ glm::mat4 Camera::perspective(float FOVdeg, float aspectRatio, float nearPlane, 
     return projection;
 }
 
-glm::vec3 Camera::getPos()
+void Camera::setLocation(glm::vec3 pos, glm::vec3 front, float yawAngle, float pitchAngle)
 {
-    return cameraPos;
+    // Camera Vectors
+    cameraPos = pos;
+    cameraFront = front;
+    cameraRight = glm::normalize(glm::cross(cameraFront, WORLD_UP));
+    cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+
+    // Camera matrix
+    cameraMatrix = CAMERA_MATRIX_DEFAULT;
+
+    // Euler Angles
+    pitch = pitchAngle;
+    yaw = yawAngle;
+
+    updateMatrix();
 }
 
 void Camera::resetCameraPosition()
@@ -102,7 +115,6 @@ void Camera::updateMatrix()
     // glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, WORLD_UP);
     glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / height, nearPlane, farPlane);
     cameraMatrix = projection * view;
-    // updateCameraVectors();
 }
 
 void Camera::updateViewport(int width, int height)
@@ -246,8 +258,8 @@ void Camera::updateCameraVectors()
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
 
-    // cameraRight = glm::normalize(glm::cross(cameraFront, WORLD_UP));
-    // cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+    cameraRight = glm::normalize(glm::cross(cameraFront, WORLD_UP));
+    cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
 }
 
 void Camera::updateDeltaTime(float deltaTime)

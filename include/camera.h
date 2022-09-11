@@ -44,7 +44,7 @@ private:
     // Methods
 public:
     Camera(int width, int height);
-    glm::vec3 getPos();
+    void setLocation(glm::vec3 pos, glm::vec3 front, float yawAngle, float pitchAngle);
     void getMatrix(Shader &shader, const char *uniform);
     void updateMatrix();
     void processInput(GLFWwindow *window, float deltaTime);
@@ -76,10 +76,11 @@ private:
     float cameraSpeed = CAMERA_SPEED_DEFAULT;
     float sensitivity = 0.1f;
     bool rotationMovement = false;
+    float pitch, yaw;
+    
     // Mouse Controls
     bool firstClick = true;
     float lastX = width / 2, lastY = height / 2;
-    float pitch, yaw;
 };
 
 #endif

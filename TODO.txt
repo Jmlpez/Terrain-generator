@@ -1,4 +1,3 @@
 TODO:
-- Terminar de organizar el terreno en una clase
 - Usar imGui para modificarlo dinamicamente en tiempo real      
 

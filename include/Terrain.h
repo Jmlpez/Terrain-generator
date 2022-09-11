@@ -10,8 +10,10 @@ public:
     Terrain(GLuint _width = 20, GLuint _height = 20);
 
     void drawTerrain(Shader &shader);
+    void checkUpdate();
 
-    void generateVertices();
+    void
+    generateVertices();
     void generateHeightMap();
     void generateIndices();
     void generateNormals();
@@ -44,12 +46,17 @@ private:
     // Mesh
     Mesh terrainMesh;
 
+public:
     GLuint width;
     GLuint height;
     GLuint layers;
+
     float frequency, amplitude;
     float scale;
     float mapHeight;
+
+    float lastFreq, lastAmp, lastScale, lastMapHeight;
+    GLuint lastWidth, lastHeight, lastLayers;
 };
 
 #endif

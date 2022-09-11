@@ -19,7 +19,14 @@ Terrain::Terrain(GLuint _width, GLuint _height) : width(_width), height(_height)
     mapHeight = defaultValue.mapHeight;
     layers = defaultValue.layers;
 
-    // cout << amplitude << " " << frequency << "\n";
+    // Save Last Values
+    lastFreq = frequency;
+    lastAmp = amplitude;
+    lastScale = scale;
+    lastMapHeight = mapHeight;
+
+    lastWidth = width;
+    lastHeight = height;
 
     resetSeed();
     resetOptions();
@@ -29,6 +36,17 @@ Terrain::Terrain(GLuint _width, GLuint _height) : width(_width), height(_height)
 void Terrain::drawTerrain(Shader &shader)
 {
     terrainMesh.Draw(shader);
+}
+
+void Terrain::checkUpdate()
+{
+    if (lastFreq != frequency)
+    {
+        setFrequency(frequency);
+        terrainMesh.setUpMesh();
+        lastFreq = frequency;
+        // cout << lastFreq << "\n;
+    }
 }
 
 void Terrain::setWidth(GLuint _width)
@@ -44,12 +62,17 @@ void Terrain::setHeight(GLuint _height)
 void Terrain::setFrequency(float _frequency)
 {
     frequency = _frequency;
-    resetOptions();
+    generateTerrain(terrainPos);
+    generateHeightMap();
+    generateNormals();
 }
 void Terrain::setAmplitude(float _amplitude)
 {
     amplitude = _amplitude;
     resetOptions();
+    generateTerrain(terrainPos);
+    generateHeightMap();
+    generateNormals();
 }
 
 void Terrain::setMapHeight(float _mapHeight)
@@ -191,7 +214,7 @@ void Terrain::generateHeightMap()
     // The noise value is used for the color of the vertice
 
     // Reset the -Y- component for the height map
-    for (auto v : terrainMesh.vertices)
+    for (auto &v : terrainMesh.vertices)
         v.position.y = 1.0f;
 
     // Assing the corresponding height to the Y component of the vertices
