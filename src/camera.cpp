@@ -196,7 +196,7 @@ void Camera::processInput(GLFWwindow *window, float deltaTime)
     {
         resetCameraPosition();
     }
-
+    /*
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
 
@@ -239,6 +239,7 @@ void Camera::processInput(GLFWwindow *window, float deltaTime)
         // Makes sure the next time the camera looks around it doesn't jump
         firstClick = true;
     }
+    */
     if (rotationMovement)
     {
         // prevent from flip the camera horizontally

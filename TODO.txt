@@ -1,3 +1,4 @@
 TODO:
-- Usar imGui para modificarlo dinamicamente en tiempo real      
+- Modificar los valores de la luz dinamicamente
+- Hacerlo mas realista
 

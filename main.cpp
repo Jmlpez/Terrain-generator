@@ -1,9 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-// #include "./include/Mesh.h"
-// #include "./include/perlin.h"
-// #include "./include/test.h"
+#include "./imgui/imgui.h"
+#include "./imgui/imgui_impl_glfw.h"
+#include "./imgui/imgui_impl_opengl3.h"
 #include "./include/Terrain.h"
 
 using namespace std;
@@ -14,13 +14,21 @@ void processInput(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 600;
-const unsigned int sceneN = 100;
-const unsigned int sceneM = 100;
+const unsigned int sceneN = 150;
+const unsigned int sceneM = 150;
 
 float lastFrame = glfwGetTime();
 float deltaTime = 0;
 
 Camera camera(SCR_WIDTH, SCR_HEIGHT);
+
+struct DirLight
+{
+    glm::vec3 direction;
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
+};
 
 int main()
 {
@@ -73,11 +81,16 @@ int main()
     shaderProgram.setMat4("model", boxModel);
 
     //---------------Setting directional light in the scene---------------//
-    shaderProgram.setVec3("dirLight.direction", 1.0f, -3.0f, 1.0f);
-    // shaderProgram.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
-    shaderProgram.setVec3("dirLight.ambient", 0.2f, 0.2f, 0.2f);
-    shaderProgram.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-    shaderProgram.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+    DirLight dirLight;
+    dirLight.direction = glm::vec3(-0.2f, 0.2f, 0.6f);
+    dirLight.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+    dirLight.diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+    dirLight.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    shaderProgram.setVec3("dirLight.direction", dirLight.direction);
+    shaderProgram.setVec3("dirLight.ambient", dirLight.ambient);
+    shaderProgram.setVec3("dirLight.diffuse", dirLight.diffuse);
+    shaderProgram.setVec3("dirLight.specular", dirLight.specular);
 
     // material settings
     shaderProgram.setFloat("material.shininess", 16.0f);
@@ -92,10 +105,16 @@ int main()
     glm::vec3 cameraFront = glm::vec3(-0.492978, -0.573576, -0.654204);
     camera.setLocation(cameraPos, cameraFront, yawAngle, pitchAngle);
 
-    float freq = plane.getFrequency(), amp = plane.getAmplitude();
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    // (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
+    bool drawTerrain = true;
     GLuint counter;
-    float angle = 1.0f;
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -122,6 +141,11 @@ int main()
         camera.processInput(window, deltaTime);
         camera.updateMatrix();
 
+        // New Frame
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
         // Tells OpenGL which Shader Program we want to use
         // Activate the shader before exporting uniforms
         shaderProgram.Activate();
@@ -131,16 +155,52 @@ int main()
 
         camera.getMatrix(shaderProgram, "camMatrix");
 
+        // ImGui::Begin("My name is window, ImGui window");
+        // ImGui::Text("Hi Mom!");
+        // ImGui::Checkbox("Draw the shape", &drawTerrain);
+        // ImGui::End();
+
+        ImGui::Begin("Light");
+        ImGui::ColorEdit3("Light Color", &dirLight.specular.x);
+        ImGui::SliderFloat3("Light Position", &dirLight.direction.x, -1.0f, 1.f);
+        ImGui::End();
+
+        shaderProgram.setVec3("dirLight.direction", dirLight.direction);
+        shaderProgram.setVec3("dirLight.specular", dirLight.specular);
+
+        ImGui::Begin("Terrain Options");
+        ImGui::SliderInt("Layers", &plane.layers, 1, 8);
+        ImGui::SliderFloat("Frequency", &plane.frequency, 1.0f, 10.0f);
+        ImGui::SliderFloat("Persistance", &plane.persistance, 0.1f, 1.0f);
+        ImGui::SliderFloat("Lacunarity", &plane.lacunarity, 1.0f, 3.0f);
+        ImGui::SliderFloat("Map Height", &plane.mapHeight, 0.0f, 15.0f);
+        ImGui::InputFloat("Distance", &plane.distance, 0.01f);
+        ImGui::InputInt("Dimension", &plane.dimension, 1);
+
+        if (ImGui::Button("Reset Seed", ImVec2(100, 30)))
+        {
+            plane.resetSeed();
+        }
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         // Draw the Terrain
-        plane.checkUpdate();
-        plane.drawTerrain(shaderProgram);
+        if (drawTerrain)
+        {
+            plane.checkUpdate();
+            plane.drawTerrain(shaderProgram);
+        }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
+    // Delete ImGui
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     // Delete all objects we've created
     shaderProgram.Delete();
     // Destroy Window object
